@@ -61,9 +61,9 @@ client.on('message', message => {
 
 
     //TODO: just for testing DELETE LATER
-    if (message.from.includes("546909982"))
+    if (message.from.includes("[number]"))
     {
-        console.log("recieved message from 536909982")
+        console.log("recieved message from [number]")
     }
 
     console.log(`Received message: ${message.body} from ${message.from}`);

@@ -2,10 +2,17 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const BTree = require('sorted-btree').default;
 const qrcode = require('qrcode-terminal');
 const express = require('express');
+const cors = require('cors');
 
 const app = express();
-const PORT = 3000;
+// app.use(cors()); // Enable CORS for all routes
+app.use(express.json());
+const PORT = 3001;
 const HOST = 'localhost'
+const corsOptions = {
+    origin: 'http://localhost:3000', // Allow requests from this origin
+    methods: 'GET', // Allow only GET requests
+  };
 
 var messages = new BTree(undefined, (a, b) => {
     if (a > b)
@@ -54,9 +61,9 @@ client.on('message', message => {
 
 
     //TODO: just for testing DELETE LATER
-    if (message.from.includes("[number]]"))
+    if (message.from.includes("546909982"))
     {
-        console.log("recieved message from [number]")
+        console.log("recieved message from 536909982")
     }
 
     console.log(`Received message: ${message.body} from ${message.from}`);
@@ -65,7 +72,7 @@ client.on('message', message => {
 client.initialize();
 
 
-app.get('/:unixTime', (req, res) => {
+app.get('/:unixTime', cors(corsOptions), (req, res) => {
     const unixTime = req.params.unixTime;
  
     const timestamp = parseInt(unixTime, 10);

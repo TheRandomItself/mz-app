@@ -84,6 +84,39 @@ const popupOpen = true
 
 
 const Map = () => {
+  const [messages, setMessages] = useState([]); // State to store markers
+  const [lastMessageTIme, setLastMessageTime] = useState(0)
+    // Function to fetch marker data from the server
+
+  
+    // Fetch marker data every 10 seconds (or any other interval)
+    useEffect(() => {
+      const fetchMarkerData = async () => {
+        try {
+          const response = await fetch('http://localhost:3001/1'); // Replace with your API endpoint
+          const data = await response.json();
+          setMessages((prevMessages) => [...prevMessages, ...data]);
+          // setMessages(data); // Update markers state with fetched data
+          console.log("the new messages are: ")
+          console.log(data)
+        } catch (error) {
+          console.error('Error fetching markers:', error);
+        }
+      };
+      fetchMarkerData(); // Fetch data on initial render
+  
+      const intervalId = setInterval(() => {
+        fetchMarkerData();
+      }, 10000); // 5 seconds
+  
+      return () => clearInterval(intervalId); // Cleanup interval on component unmount
+    }, []);
+
+
+    useEffect(() => {
+      // This effect runs whenever messages change
+      console.log('Messages updated:', messages);
+    }, [messages]); // Include messages to watch for changes
 
   return (
     <MapContainer

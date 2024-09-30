@@ -9,7 +9,15 @@ const center = {
   lng: 34.78718205370926,
 }
 
-
+let customIcon1 = new L.Icon({
+  iconUrl: require('leaflet/dist/images/marker-icon-green.png'),
+  // iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+  // iconRetinaUrl: require('leaflet/dist/images/marker-icon-green.png'),
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+});
 function DraggableMarker() {
   const [draggable, setDraggable] = useState(false)
   const [position, setPosition] = useState(center)
@@ -36,7 +44,7 @@ function DraggableMarker() {
       eventHandlers={eventHandlers}
       position={position}
       ref={markerRef}
-      icon={customIcon}>
+      icon={customIcon1}>
       <Popup minWidth={90}>
         <span onClick={toggleDraggable}>
           {draggable
@@ -70,14 +78,7 @@ const markerBounds = [
   { bounds: [pointsOfInterest[3].position, [pointsOfInterest[3].position[0] - offset, pointsOfInterest[3].position[1] + offset]], text: "leonardo" },
 ]
 
-const customIcon = new L.Icon({
-  iconUrl: require('leaflet/dist/images/marker-icon.png'),
-  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-});
+
 
 const popupOpen = true
 
@@ -86,6 +87,21 @@ const popupOpen = true
 const Map = () => {
   const [messages, setMessages] = useState([]); // State to store markers
   const [lastMessageTIme, setLastMessageTime] = useState(0)
+  
+  let  messagesRef = useRef([]);
+  let lastTimeStamp = useRef(0)
+  let count = useRef(0)
+  let customIcon = useRef(new L.Icon({
+    iconUrl: require('leaflet/dist/images/marker-icon-green.png'),
+    // iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+    // iconRetinaUrl: require('leaflet/dist/images/marker-icon-green.png'),
+    shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+  }));
+  const [icon, setIcon] = useState(customIcon.current)
+
     // Function to fetch marker data from the server
 
   
@@ -93,12 +109,40 @@ const Map = () => {
     useEffect(() => {
       const fetchMarkerData = async () => {
         try {
-          const response = await fetch('http://localhost:3001/1'); // Replace with your API endpoint
+          const response = await fetch('http://localhost:3001/' + lastTimeStamp.current); // Replace with your API endpoint
           const data = await response.json();
-          setMessages((prevMessages) => [...prevMessages, ...data]);
-          // setMessages(data); // Update markers state with fetched data
-          console.log("the new messages are: ")
-          console.log(data)
+          messagesRef.current = [...messagesRef.current, ...data]
+          console.log("the messageRef is: ")
+          console.log(messagesRef.current)
+          lastTimeStamp.current = messagesRef.current[messagesRef.current.length - 1][0]
+          console.log("the lastMessageTime is: ")
+          console.log(lastTimeStamp.current)
+          if (count.current % 2 === 0){
+            customIcon.current = new L.Icon({
+              iconUrl: require('leaflet/dist/images/marker-icon-red.png'),
+              // iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+              // iconRetinaUrl: require('leaflet/dist/images/marker-icon-green.png'),
+              shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+              iconSize: [25, 41],
+              iconAnchor: [12, 41],
+              popupAnchor: [1, -34],
+            })
+          }
+          else{
+            customIcon.current = new L.Icon({
+              iconUrl: require('leaflet/dist/images/marker-icon-green.png'),
+              // iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+              // iconRetinaUrl: require('leaflet/dist/images/marker-icon-green.png'),
+              shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+              iconSize: [25, 41],
+              iconAnchor: [12, 41],
+              popupAnchor: [1, -34],
+            })
+          }
+          console.log(customIcon.current)
+          setIcon(customIcon.current)
+          count.current = count.current + 1
+
         } catch (error) {
           console.error('Error fetching markers:', error);
         }
@@ -107,16 +151,11 @@ const Map = () => {
   
       const intervalId = setInterval(() => {
         fetchMarkerData();
-      }, 10000); // 5 seconds
+      }, 1000); // 5 seconds
   
       return () => clearInterval(intervalId); // Cleanup interval on component unmount
     }, []);
 
-
-    useEffect(() => {
-      // This effect runs whenever messages change
-      console.log('Messages updated:', messages);
-    }, [messages]); // Include messages to watch for changes
 
   return (
     <MapContainer
@@ -130,7 +169,7 @@ const Map = () => {
       />
       <Polygon positions={cityBorderCoords} color="blue" fillColor="lightblue" fillOpacity={0.5} />
       {pointsOfInterest.map((point, index) => (
-        <Marker key={index} position={point.position} icon={customIcon}>
+        <Marker key={index} position={point.position} icon={icon}>
           <Popup open={popupOpen}>{point.name}</Popup>
         </Marker>
         

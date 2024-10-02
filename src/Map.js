@@ -107,9 +107,19 @@ const Map = () => {
   
     // Fetch marker data every 10 seconds (or any other interval)
     useEffect(() => {
+      const fetchWithTimeout = (url, options, timeout = 5000) => {
+        return Promise.race([
+            fetch(url, options),
+            new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Request timed out')), timeout)
+            )
+        ]);
+    };
+    
       const fetchMarkerData = async () => {
         try {
-          const response = await fetch('http://localhost:3001/' + lastTimeStamp.current); // Replace with your API endpoint
+          const response = await fetchWithTimeout('http://localhost:3001/' + lastTimeStamp.current, { method: 'GET' });
+          // const response = await fetch('http://localhost:3001/' + lastTimeStamp.current); // Replace with your API endpoint
           const data = await response.json();
           messagesRef.current = [...messagesRef.current, ...data]
           console.log("the messageRef is: ")

@@ -1,5 +1,5 @@
 import React from 'react';
-import Map from './Map'; // Adjust the path if needed
+import Map from './Map/Map'; // Adjust the path if needed
 import 'leaflet/dist/leaflet.css';
 const App = () => {
   return (

@@ -1,9 +1,9 @@
 import { MapContainer, TileLayer, Polygon, Marker, Popup, SVGOverlay  } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
-import { center, cityBorderCoords, pointsOfInterest, markerBounds, defaultIcon } from '../constants/constants';
+import { center, cityBorderCoords, pointsOfInterest, markerBounds, defaultIcon, badWords, goodWords } from '../constants/constants';
 import DraggableMarker from '../DraggableMarker/DraggableMarker';
-import L from 'leaflet';
+import L, { point } from 'leaflet';
 
 const Map = () => {
   const [messages, setMessages] = useState([]);
@@ -20,6 +20,56 @@ const Map = () => {
         console.log("the new icon is: " + newIcon)
         setGateIcons((prevIcons) => prevIcons.map((icon, index) => pointsOfInterest[index].name === gateName ? newIcon :icon))
       }
+
+
+      const decideGatesStatusByMessage = (messageStr) => {
+        let gateStatuses = {}
+        pointsOfInterest.forEach(gateData => {
+          let isBadWordFound = false
+          gateData.name_hb.forEach(hbName => {
+            badWords.forEach(badWord => {
+              if (messageStr.includes(hbName + badWord) || messageStr.includes(hbName + " " + badWord)) {
+                gateStatuses[gateData.name] =  "red"
+                isBadWordFound = true
+              }
+            })
+            if (!isBadWordFound){
+              goodWords.forEach(goodWord => {
+                if (messageStr.includes(hbName + goodWord) || messageStr.includes(hbName + " " + goodWord)) {
+                  gateStatuses[gateData.name] = "green"
+                }
+              })
+            }
+          })
+        })
+        return gateStatuses
+      }
+      const decideGateStatusesFromTime = (fromTime) => {
+        let gateStatuses = {}
+        pointsOfInterest.forEach(gateData => {
+          gateStatuses[gateData.name] = ""
+        })
+        let startIndex = messagesRef.current.length
+        for (let i = messagesRef.current.length - 1; i >= 0; i--) {
+          if (messagesRef.current[i][0] >= fromTime)
+            startIndex = i
+        }
+        if (startIndex == messagesRef.current.length)
+          return gateStatuses
+
+        for (let i = startIndex; i < messagesRef.current.length; i++) {
+          let message = messagesRef.current[i]
+          try {
+            if (message.length >= 2)
+                gateStatuses = {...gateStatuses, ...decideGatesStatusByMessage(message[1].body)}
+          }
+          catch (error){
+            console.log("error deciding gate statuses: " + error)
+          }
+        }
+        return gateStatuses
+      }
+      
         const getMarkerIconByColor = (color) => {
           return new L.Icon({
             iconUrl: require('leaflet/dist/images/marker-icon-' + color + '.png'),
@@ -49,8 +99,14 @@ const Map = () => {
           messagesRef.current = [...messagesRef.current, ...data]
 
           lastTimeStamp.current = messagesRef.current[messagesRef.current.length - 1][0]
-          updateGateIcon(pointsOfInterest[count.current %  pointsOfInterest.length].name, Math.floor((count.current / pointsOfInterest.length)) % 2 == 0 ?   getMarkerIconByColor('green') : getMarkerIconByColor('red'))
-
+          // updateGateIcon(pointsOfInterest[count.current %  pointsOfInterest.length].name, Math.floor((count.current / pointsOfInterest.length)) % 2 == 0 ?   getMarkerIconByColor('green') : getMarkerIconByColor('red'))
+          let currentTime = new Date()
+          let tenMinutesAgo = currentTime.getTime() - 10 * 60 * 1000
+          let gateStatuses = decideGateStatusesFromTime(0)
+          pointsOfInterest.forEach(gate => {
+            if (gateStatuses[gate.name])
+              updateGateIcon(gate.name, getMarkerIconByColor(gateStatuses[gate.name]))
+          })
           count.current = count.current + 1
 
         } catch (error) {

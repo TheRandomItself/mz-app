@@ -14,14 +14,17 @@ export const cityBorderCoords = [
     [32.07840195378189, 34.79290743074442],
   ];
   
-  // If you want to add a gate, add a new line to the pointsOfInterest with position and gate name and it will do the magic
+  // If you want to add a gate, add a new line to the pointsOfInterest and it will do the magic
 export const pointsOfInterest = [
-    { position: [32.07548376066005,  34.79071337991549], name: "begin" },
-    { position: [32.073674796781276,  34.78610477046914], name: "kaplan" },
-    { position: [32.07612473234684,  34.787204873205205], name: "shaul" },
-    { position: [32.07462023150681, 34.78471587382616], name: "leonardo" },
-    ];
-  
+    { position: [32.07548376066005,  34.79071337991549], name: "begin", name_hb: ["ט", "ב"] },
+    { position: [32.073674796781276,  34.78610477046914], name: "kaplan", name_hb: ["ק"] },
+    { position: [32.07612473234684,  34.787204873205205], name: "shaul", name_hb: ["ש"] },
+    { position: [32.07462023150681, 34.78471587382616], name: "leonardo", name_hb: ["ל"] },
+];
+
+export const badWords = ["מלוכלך", "מטונף", "מזוהם", "על הפרצוף"]
+export const goodWords = ["נקי", "מצוחצך"]
+
 const offset = 0.0009
 export const markerBounds = pointsOfInterest.map(point => {
     return {bounds: [point.position, [point.position[0] - offset, point.position[1] + offset]], text:  point.name }

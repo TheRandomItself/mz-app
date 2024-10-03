@@ -14,7 +14,7 @@ export const cityBorderCoords = [
     [32.07840195378189, 34.79290743074442],
   ];
   
-  // If you want to add a gate, add a new line to the pointsOfInterest and it will do the magic
+  // If you want to add a gate, add a new line to the pointsOfInterest with position and gate name and it will do the magic
 export const pointsOfInterest = [
     { position: [32.07548376066005,  34.79071337991549], name: "begin" },
     { position: [32.073674796781276,  34.78610477046914], name: "kaplan" },

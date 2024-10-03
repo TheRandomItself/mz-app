@@ -4,7 +4,7 @@ import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react'
 import { center, cityBorderCoords, pointsOfInterest, markerBounds, defaultIcon } from '../constants/constants';
 import DraggableMarker from '../DraggableMarker/DraggableMarker';
 import L from 'leaflet';
-//
+
 const Map = () => {
   const [messages, setMessages] = useState([]);
   const [lastMessageTIme, setLastMessageTime] = useState(0)

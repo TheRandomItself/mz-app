@@ -4,15 +4,25 @@ import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react'
 import { center, cityBorderCoords, pointsOfInterest, markerBounds, defaultIcon, badWords, goodWords } from '../constants/constants';
 import DraggableMarker from '../DraggableMarker/DraggableMarker';
 import L, { point } from 'leaflet';
+import './Map.css';
 
 const Map = () => {
   const [messages, setMessages] = useState([]);
   const [lastMessageTIme, setLastMessageTime] = useState(0)
   const [gateIcons, setGateIcons] = useState(Array(pointsOfInterest.length).fill(defaultIcon));
-
+  const [dimensions, setDimensions] = useState({ width: 300, height: 400 });
+  const messageBoxRef = useRef(null);
+  const isFollowingBoxRef = useRef(true)
   let  messagesRef = useRef([]);
   let lastTimeStamp = useRef(0)
   let count = useRef(0)
+
+
+  useEffect(() => {
+    if (messageBoxRef.current && isFollowingBoxRef.current) {
+        messageBoxRef.current.scrollTop = messageBoxRef.current.scrollHeight;
+    }
+}, [messages]);
 
     useEffect(() => {
       const updateGateIcon = (gateName, newIcon) => {
@@ -97,7 +107,6 @@ const Map = () => {
           const response = await fetchWithTimeout('http://localhost:3001/' + lastTimeStamp.current, { method: 'GET' });
           const data = await response.json();
           messagesRef.current = [...messagesRef.current, ...data]
-
           lastTimeStamp.current = messagesRef.current[messagesRef.current.length - 1][0]
           // updateGateIcon(pointsOfInterest[count.current %  pointsOfInterest.length].name, Math.floor((count.current / pointsOfInterest.length)) % 2 == 0 ?   getMarkerIconByColor('green') : getMarkerIconByColor('red'))
           let currentTime = new Date()
@@ -108,7 +117,14 @@ const Map = () => {
               updateGateIcon(gate.name, getMarkerIconByColor(gateStatuses[gate.name]))
           })
           count.current = count.current + 1
-
+          // isFollowingBoxRef
+          if (messageBoxRef.current.scrollTop == messageBoxRef.current.scrollHeight){
+            isFollowingBoxRef.current = true
+          }
+          else{
+            isFollowingBoxRef.current = false
+          }
+          setMessages(messagesRef.current)
         } catch (error) {
           console.error('Error fetching markers:', error);
         }
@@ -124,11 +140,13 @@ const Map = () => {
 
 
   return (
+    <>
     <MapContainer
       center={[32.0749462988577, 34.78718205370926]}
       zoom={17}
       style={{ height: "100vh", width: "100%" }}
     >
+
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -150,7 +168,17 @@ const Map = () => {
     </SVGOverlay>
           ))}
     <DraggableMarker />
+    <div className="message-box" ref={messageBoxRef}>
+      <div className="messages">
+          {messages.map((msg, index) => (
+            <div key={index} className="message">{msg[1].body}</div>
+          ))}
+      </div>
+      {/* <div className="resizer" ref={resizerRef} onMouseDown={handleMouseDown}></div> */}
+    </div>
     </MapContainer>
+
+    </>
   );
 };
 

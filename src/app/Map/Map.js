@@ -15,7 +15,8 @@ const Map = () => {
   const isFollowingBoxRef = useRef(true)
   let  messagesRef = useRef([]);
   let lastTimeStamp = useRef(0)
-  let count = useRef(0)
+  let isStartInterval = useRef(false)
+  // let count = useRef(0)
 
 
   useEffect(() => {
@@ -116,7 +117,7 @@ const Map = () => {
             if (gateStatuses[gate.name])
               updateGateIcon(gate.name, getMarkerIconByColor(gateStatuses[gate.name]))
           })
-          count.current = count.current + 1
+          // count.current = count.current + 1
           // isFollowingBoxRef
           if (messageBoxRef.current.scrollTop == messageBoxRef.current.scrollHeight){
             isFollowingBoxRef.current = true
@@ -124,13 +125,19 @@ const Map = () => {
           else{
             isFollowingBoxRef.current = false
           }
+          if (isStartInterval.current){
+            isStartInterval.current = false
+            isFollowingBoxRef.current = true
+            messageBoxRef.current.scrollTop = messageBoxRef.current.scrollHeight
+          }
           setMessages(messagesRef.current)
         } catch (error) {
           console.error('Error fetching markers:', error);
         }
       };
       fetchMarkerData();
-  
+      // messageBoxRef.current.scrollTop = messageBoxRef.current.scrollHeight
+
       const intervalId = setInterval(() => {
         fetchMarkerData();
       }, 1000);

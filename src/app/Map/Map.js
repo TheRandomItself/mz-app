@@ -12,23 +12,27 @@ const Map = () => {
   const [gateIcons, setGateIcons] = useState(Array(pointsOfInterest.length).fill(defaultIcon));
   const [dimensions, setDimensions] = useState({ width: 300, height: 400 });
   const messageBoxRef = useRef(null);
-  const isFollowingBoxRef = useRef(true)
+  const prevScrollHeight = useRef(0)
+  const prevScrollTop = useRef(0)
+  const [messageBoxScroll, setMessageBoxScroll] = useState(null)
   let  messagesRef = useRef([]);
   let lastTimeStamp = useRef(0)
-  let isStartInterval = useRef(false)
-  // let count = useRef(0)
 
 
   useEffect(() => {
-    if (messageBoxRef.current && isFollowingBoxRef.current) {
+    if (!messageBoxRef.current) return 
+    if (messageBoxRef.current.scrollTop - prevScrollTop.current >= -5) {
         messageBoxRef.current.scrollTop = messageBoxRef.current.scrollHeight;
+        prevScrollTop.current = messageBoxRef.current.scrollTop
     }
+    else{
+      prevScrollTop.current = prevScrollTop.current + messageBoxRef.current.scrollHeight - prevScrollHeight.current
+    }
+    prevScrollHeight.current = messageBoxRef.current.scrollHeight
 }, [messages]);
 
     useEffect(() => {
       const updateGateIcon = (gateName, newIcon) => {
-        console.log("entered updateGateIcon with getName: " + gateName)
-        console.log("the new icon is: " + newIcon)
         setGateIcons((prevIcons) => prevIcons.map((icon, index) => pointsOfInterest[index].name === gateName ? newIcon :icon))
       }
 
@@ -111,32 +115,18 @@ const Map = () => {
           lastTimeStamp.current = messagesRef.current[messagesRef.current.length - 1][0]
           // updateGateIcon(pointsOfInterest[count.current %  pointsOfInterest.length].name, Math.floor((count.current / pointsOfInterest.length)) % 2 == 0 ?   getMarkerIconByColor('green') : getMarkerIconByColor('red'))
           let currentTime = new Date()
-          let tenMinutesAgo = currentTime.getTime() - 10 * 60 * 1000
-          let gateStatuses = decideGateStatusesFromTime(0)
+          let tenMinutesAgo = Math.floor(currentTime.getTime() / 1000) - 10 * 60
+          let gateStatuses = decideGateStatusesFromTime(tenMinutesAgo)
           pointsOfInterest.forEach(gate => {
             if (gateStatuses[gate.name])
               updateGateIcon(gate.name, getMarkerIconByColor(gateStatuses[gate.name]))
           })
-          // count.current = count.current + 1
-          // isFollowingBoxRef
-          if (messageBoxRef.current.scrollTop == messageBoxRef.current.scrollHeight){
-            isFollowingBoxRef.current = true
-          }
-          else{
-            isFollowingBoxRef.current = false
-          }
-          if (isStartInterval.current){
-            isStartInterval.current = false
-            isFollowingBoxRef.current = true
-            messageBoxRef.current.scrollTop = messageBoxRef.current.scrollHeight
-          }
           setMessages(messagesRef.current)
         } catch (error) {
           console.error('Error fetching markers:', error);
         }
       };
       fetchMarkerData();
-      // messageBoxRef.current.scrollTop = messageBoxRef.current.scrollHeight
 
       const intervalId = setInterval(() => {
         fetchMarkerData();

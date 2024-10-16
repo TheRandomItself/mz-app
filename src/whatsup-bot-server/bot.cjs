@@ -6,17 +6,19 @@ const cors = require('cors');
 const app = express();
 app.use(express.json());
 const PORT = 3001;
-const HOST = 'localhost'
+// const HOST = 'localhost'
+const HOST = '192.168.50.217'
 
-const allowedOrigins = ['http://localhost:3000', 'http://192.168.50.106:3000', 'http://192.168.50.106:3000/'];
+const allowedOrigins = ['http://localhost:3000', 'http://192.168.50.106:3000', 'http://192.168.50.106:3000/', 'exp://192.168.50.217:8081', 'http://192.168.50.217:8081', 'http://192.168.50.217:3001/', 'http://192.168.50.217:3001'];
 
 const corsOptions = {
     origin: function (origin, callback) {
-        if (allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS')); // Reject the origin
-        }
+        callback(null, true);
+        // if (allowedOrigins.indexOf(origin) !== -1) {
+        //     callback(null, true);
+        // } else {
+        //     callback(new Error('Not allowed by CORS')); // Reject the origin
+        // }
     },
     methods: 'GET',
   };
@@ -91,7 +93,6 @@ client.on('message', message => {
     if (message.from.includes("[number]"))
     {
         console.log("recieved message from [number]")
-        // let reversedMessage = message.body.split('').reverse().join('')
         let wordArray = message.body.split(' ')
 
 const anotherString = '░░░░░░░░░░░█▀▀░░█░░░░░░\n' + 
@@ -105,9 +106,8 @@ const anotherString = '░░░░░░░░░░░█▀▀░░█░░
 '░░░█▄░░▀▄░░░░▄▀▐░█░░░░░\n'+
 '░░░█▐▀▀▀░▀▀▀▀░░▐░█░░░░░\n'+
 '░░▐█▐▄░░▀░░░░░░▐░█▄▄░░\n'+
-'░░░▀▀░▄TSM▄░░░▐▄▄▄▀░░░'
+'░░░▀▀░▄░▄░▄░░░▐▄▄▄▀░░░'
 
-        // message.reply(anotherString)
     }
 
     console.log(`Received message: ${message.body} from ${message.from}`);
@@ -115,7 +115,44 @@ const anotherString = '░░░░░░░░░░░█▀▀░░█░░
 
 client.initialize();
 
+function generateRandomMessages() {
+    let messageArray = ["טנקי", "קנקי", "שנקי", "טמלוכלך", "קמלוכלך", "שמלוכלך"]
+    let randomIndex = Math.floor(Math.random() * (messageArray.length))
+    console.log(messageArray[randomIndex])
+    return messageArray[randomIndex]
 
+}
+
+function printMessages() {
+    messages.forEachPair((key, value) => {
+        console.log("key is: " + key)
+        console.log("value is: ")
+        console.log(value)
+    })
+}
+
+function deleteMessages() {
+    let currentTime = new Date()
+    let oneHourAgo = Math.floor(currentTime.getTime() / 1000) - 60 * 60
+    messages.deleteRange(0, oneHourAgo) 
+    setTimeout(deleteMessages, 1000 * 60 * 30);
+}
+
+deleteMessages()
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//this is only for testing
+function addMessages() {
+    console.log("-------------------------------the messages are: -------------------------------")
+    printMessages()
+    let currentTime = new Date()
+    messages.set(Math.floor(currentTime.getTime() / 1000) - 5 * 60, 
+        { from: 'Charlie', body: generateRandomMessages(), 
+        timestamp: Math.floor(currentTime.getTime() / 1000) - 5 * 60 });
+    setTimeout(addMessages, 6000);
+}
+
+addMessages();
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 app.get('/:unixTime', cors(corsOptions), (req, res) => {
     const unixTime = req.params.unixTime;
  
@@ -123,7 +160,7 @@ app.get('/:unixTime', cors(corsOptions), (req, res) => {
 
     if (!isNaN(timestamp)) {
         const date = new Date(timestamp);
-        const currentTimeMilliseconds = new Date().getTime()
+        const currentTimeMilliseconds = new Date().getTime() // it is much larger than normal seconds
         let messageRange = messages.getRange(timestamp, currentTimeMilliseconds)
         res.status(200).send(messageRange)
         // res.status(200).send(`Unix Time: ${unixTime} corresponds to ${date.toISOString()}`);
@@ -136,11 +173,3 @@ app.get('/:unixTime', cors(corsOptions), (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running at http://${HOST}:${PORT}`);
 });
-// chatWithGPT('yoo wassup')
-// some helpful logs to see the format of the messages:
-// Received message: סקיבידי טוילט ריז סיגמה מה לעזאסיגמה ריז עם הגיאט של הבומבוקלאט גיגה ג'יגה ניגה סקיבידי from [number]@c.us   -   this is from a single person (c.us at the end)
-// message from mom 
-// Received message: אי from [number]-1469259523@g.us
-// Received message:  from 120363338272329737@g.us
-// Received message: ניסוי חברתי from 120363338272329737@g.us   -   this is from a group created by me   (g.us at the end)
-// Received message: שמעו לי אם רוצים לעשות כסף צריך למכור משקפי טכנו from [number]-1476455280@g.us   -   this is from another group (g.us at the end)

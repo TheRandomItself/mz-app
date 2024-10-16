@@ -110,6 +110,7 @@ const Map = () => {
       const fetchMarkerData = async () => {
         try {
           const response = await fetchWithTimeout('http://localhost:3001/' + lastTimeStamp.current, { method: 'GET' });
+          // const response = await fetchWithTimeout('http://192.168.50.217:3001/' + lastTimeStamp.current, { method: 'GET' });
           const data = await response.json();
           messagesRef.current = [...messagesRef.current, ...data]
           lastTimeStamp.current = messagesRef.current[messagesRef.current.length - 1][0]

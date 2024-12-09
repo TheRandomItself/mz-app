@@ -105,6 +105,7 @@ const Map = () => {
         ]);
     };
 
+    // made some changes in branch_for_testing
 
     
       const fetchMarkerData = async () => {

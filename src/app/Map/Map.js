@@ -105,7 +105,7 @@ const Map = () => {
         ]);
     };
 
-
+// giving some changes for commit stuff
     
       const fetchMarkerData = async () => {
         try {

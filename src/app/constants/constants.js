@@ -4,6 +4,8 @@ export const center = {
     lat: 32.0749462988577,
     lng: 34.78718205370926,
   }
+
+  //change here godawm it
   
 export const cityBorderCoords = [
     [32.07554717251997, 34.7844746812443],

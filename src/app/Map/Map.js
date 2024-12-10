@@ -129,7 +129,7 @@ const Map = () => {
         }
       };
       fetchMarkerData();
-
+// change here godawmn it
       const intervalId = setInterval(() => {
         fetchMarkerData();
       }, 1000);

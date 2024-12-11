@@ -3,7 +3,7 @@ import 'leaflet/dist/leaflet.css';
 import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import { center, cityBorderCoords, pointsOfInterest, markerBounds, defaultIcon } from '../constants/constants';
 
-
+// just commit
 function DraggableMarker() {
   const [draggable, setDraggable] = useState(false)
   const [position, setPosition] = useState(center)

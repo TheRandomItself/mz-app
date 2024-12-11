@@ -130,10 +130,14 @@ const Map = () => {
       };
       fetchMarkerData();
 // change here godawmn it
+
+//sadasdasdasdsad
       const intervalId = setInterval(() => {
         fetchMarkerData();
       }, 1000);
   
+      let hello = 6
+      console.log(hello)
       return () => clearInterval(intervalId);
     }, []);
 
